@@ -19,6 +19,15 @@ type User struct {
 	Email  string `json:"email" form:"email"`
 }
 
+var DaftarVendor = []Vendor{}
+
+type Vendor struct {
+	Nama_Vendor    string `json:"name_vendor" form:"name_vendor"`
+	Type_expedisi  string `json:"type_expedisi" form:"type_expedisi"`
+	Jenis_angkutan string `json:"jenis_angkutan" form:"jenis_angkutan"`
+	Type_angkutan  string `json:"type_angkutan" form:"type_angkutan"`
+}
+
 func connectDB() *gorm.DB {
 	dsn := "root:@tcp(localhost:3306)/logistic?charset=utf8mb4&parseTime=True&loc=Local"
 	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -70,7 +79,7 @@ func PostRegister(db *gorm.DB) echo.HandlerFunc {
 // Get All Data Vendor
 func AllVendor(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var vendor []User
+		var vendor []Vendor
 		if err := db.Find(&vendor).Error; err != nil {
 			log.Error(err.Error())
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -88,17 +97,18 @@ func AllVendor(db *gorm.DB) echo.HandlerFunc {
 // Data Vendor
 func DateVendor(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var Dvendor []User
-		if err := db.Find(&Dvendor).Error; err != nil {
-			log.Error(err.Error())
+		type_expedisi := c.Param("type_expedisi")
+
+		var resQry Vendor
+
+		if err := db.First(&resQry, "type_expedisi = ?", type_expedisi).Error; err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"message": "error on database",
+				"message": "cannot select data",
 			})
 		}
-
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "succes get data Vendor",
-			"data":    Dvendor,
+			"message": "succes Date Vendor",
+			"data":    resQry,
 		})
 	}
 }
@@ -106,7 +116,7 @@ func DateVendor(db *gorm.DB) echo.HandlerFunc {
 // Tambah Data Vendor (POST)
 func CreateVendor(db *gorm.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		var CreateVendor User
+		var CreateVendor Vendor
 		if err := c.Bind(&CreateVendor); err != nil {
 			log.Error(err)
 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -130,13 +140,14 @@ func main() {
 	e := echo.New()
 	db := connectDB()
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Vendor{})
 	e.Use(middleware.Logger())
 
 	o := e.Group("/orm")
 	o.GET("/login/:name", GetLogin(db))
-	o.GET("/vendor", AllVendor(db))
 	o.POST("/register", PostRegister(db))
-	o.GET("/dataVendor", DateVendor(db))
+	o.GET("/vendor", AllVendor(db))
+	o.GET("/dateVendor/:type_expedisi", DateVendor(db))
 	o.POST("/createVendor", CreateVendor(db))
 	e.Start(":8000")
 }
