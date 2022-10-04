@@ -22,7 +22,7 @@ type User struct {
 var DaftarVendor = []Vendor{}
 
 type Vendor struct {
-	Nama_Vendor    string `json:"name_vendor" form:"name_vendor"`
+	Nama_Vendor    string `json:"nama_vendor" form:"nama_vendor"`
 	Type_expedisi  string `json:"type_expedisi" form:"type_expedisi"`
 	Jenis_angkutan string `json:"jenis_angkutan" form:"jenis_angkutan"`
 	Type_angkutan  string `json:"type_angkutan" form:"type_angkutan"`
