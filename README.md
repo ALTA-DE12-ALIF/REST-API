@@ -9,3 +9,4 @@ adapun yang harus diimport antara lain sebagai berikut:
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 ```
+## Terima kasih
